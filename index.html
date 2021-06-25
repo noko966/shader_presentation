@@ -1,0 +1,236 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>reveal.js</title>
+
+	<link rel="stylesheet" href="dist/reset.css">
+	<link rel="stylesheet" href="dist/reveal.css">
+	<link rel="stylesheet" href="dist/theme/black.css">
+
+	<!-- Theme used for syntax highlighted code -->
+	<link rel="stylesheet" href="plugin/highlight/monokai.css">
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<!-- slide 1 -->
+			<section>
+				<h2>WEBGL Shaders</h2>
+				<p>by Nikolay Kananov</p>
+			</section>
+
+			<!-- slide 2 -->
+			<section>
+				<h2>Introduction</h2>
+				<video data-autoplay src="assets/videos/slide1.mp4"></video>
+			</section>
+			<!-- slide 3 -->
+			<section>
+				<h2>Gutenberg's press</h2>
+				<img src="assets/gutenpress.jpg" alt="">
+			</section>
+
+			<!-- slide 4 -->
+			<section>
+				<h2>Math we need to know</h2>
+				<ul>
+					<li>linear algebra</li>
+					<li>trigonometry</li>
+				</ul>
+			</section>
+
+			<!-- slide 5 -->
+			<section>
+				<h2>Shader Slang</h2>
+				<ul>
+					<li>lerp</li>
+					<li>functions</li>
+					<li>sinusoid</li>
+					<li>cartesian coordinates</li>
+					<li>polar coordinates</li>
+					<li>perlin noise</li>
+					<li>voronoi</li>
+					<li>etc...</li>
+				</ul>
+			</section>
+
+			<!-- slide 6 -->
+			<section>
+				<h2>What is a fragment shader?</h2>
+				<div class="nk_video_exapmle_wrapper">
+					<video class="nk_video_exapmle" data-autoplay loop src="assets/videos/ex1.mp4"></video>
+					<video class="nk_video_exapmle" data-autoplay loop src="assets/videos/ex2.mp4"></video>
+					<video class="nk_video_exapmle" data-autoplay loop src="assets/videos/ex3.mp4"></video>
+				</div>
+			</section>
+
+
+			<!-- slide 7 -->
+			<section>
+				<h2>Why are shaders fast?</h2>
+				<img src="assets/why_fast.jpeg" alt="">
+			</section>
+
+			<!-- slide 8 -->
+			<section>
+				<h2>every 3d model is a MESH</h2>
+				<img src="assets/mesh.jpg" alt="">
+			</section>
+
+			<!-- slide 8 -->
+			<section>
+				<section>
+					<h2>MESH normals</h2>
+					<img src="assets/normals_vertOrder.jpg" alt="">
+				</section>
+				<section>
+					<pre><code data-trim data-noescape>
+						const normalBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+
+  const vertexNormals = [
+    // Front
+     0.0,  0.0,  1.0,
+     0.0,  0.0,  1.0,
+     0.0,  0.0,  1.0,
+     0.0,  0.0,  1.0,
+
+    // Back
+     0.0,  0.0, -1.0,
+     0.0,  0.0, -1.0,
+     0.0,  0.0, -1.0,
+     0.0,  0.0, -1.0,
+
+    // Top
+     0.0,  1.0,  0.0,
+     0.0,  1.0,  0.0,
+     0.0,  1.0,  0.0,
+     0.0,  1.0,  0.0,
+
+    // Bottom
+     0.0, -1.0,  0.0,
+     0.0, -1.0,  0.0,
+     0.0, -1.0,  0.0,
+     0.0, -1.0,  0.0,
+
+    // Right
+     1.0,  0.0,  0.0,
+     1.0,  0.0,  0.0,
+     1.0,  0.0,  0.0,
+     1.0,  0.0,  0.0,
+
+    // Left
+    -1.0,  0.0,  0.0,
+    -1.0,  0.0,  0.0,
+    -1.0,  0.0,  0.0,
+    -1.0,  0.0,  0.0
+  ];
+
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals),
+                gl.STATIC_DRAW);
+
+...
+
+  return {
+    position: positionBuffer,
+    normal: normalBuffer,
+    textureCoord: textureCoordBuffer,
+    indices: indexBuffer,
+  };
+						  </code></pre>
+				</section>
+				<section>
+					<pre><code data-trim data-noescape>
+						const fsSource = `
+    varying highp vec2 vTextureCoord;
+    varying highp vec3 vLighting;
+
+    uniform sampler2D uSampler;
+
+    void main(void) {
+      highp vec4 texelColor = texture2D(uSampler, vTextureCoord);
+
+      gl_FragColor = vec4(texelColor.rgb * vLighting, texelColor.a);
+    }
+  `;
+						  </code></pre>
+				</section>
+				<section>
+					<video class="nk_video_exapmle" data-autoplay loop src="assets/videos/noemal_cube.mp4"></video>
+				</section>
+			</section>
+
+
+			<!-- slide 9 -->
+			<section>
+				<section>
+					<img src="assets/tube_1.jpeg" alt="">
+				</section>
+				<section>
+					<img src="assets/tube_2.jpeg" alt="">
+				</section>
+				
+			</section>
+
+			<!-- slide 10 -->
+			<section>
+				<section>
+					<h3>800 x 600</h3>
+					<img src="assets/800x600.jpg" alt="">
+				</section>
+				<section>
+					<p>800 x 600 = 480 000px</p>
+					<p>30 times per secund</p>
+				</section>
+				<section>
+					<h2><span style="color: #ffe212; font-size: 80px;">14 400 000</span> computations</h2>
+				</section>
+				<section>
+					<h1>parallel processing</h1>
+				</section>
+				<section>
+					<h2>Graphic Processor Unit </h2>
+					<h1>(GPU)</h1>
+				</section>
+				<section>
+					<img src="assets/GPU.jpg" alt="">
+				</section>
+			</section>
+
+			<!-- slide 10 -->
+			<section>
+				<h2>What is GLSL?</h2>
+				<h2 class="nk_accent_txt">openGL Shading Language</h2>
+			</section>
+
+
+
+
+
+
+		</div>
+	</div>
+
+	<script src="dist/reveal.js"></script>
+	<script src="plugin/notes/notes.js"></script>
+	<script src="plugin/markdown/markdown.js"></script>
+	<script src="plugin/highlight/highlight.js"></script>
+	<script>
+		// More info about initialization & config:
+		// - https://revealjs.com/initialization/
+		// - https://revealjs.com/config/
+		Reveal.initialize({
+			hash: true,
+
+			// Learn about plugins: https://revealjs.com/plugins/
+			plugins: [RevealMarkdown, RevealHighlight, RevealNotes]
+		});
+	</script>
+</body>
+
+</html>
